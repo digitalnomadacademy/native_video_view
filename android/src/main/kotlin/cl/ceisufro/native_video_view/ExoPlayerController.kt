@@ -68,6 +68,7 @@ class ExoPlayerController(private val id: Int,
         this.registrarActivityHashCode = registrar.activity().hashCode()
         this.constraintLayout = LayoutInflater.from(registrar.activity())
                 .inflate(R.layout.exoplayer_layout, null) as ConstraintLayout
+
         this.surfaceView = constraintLayout.findViewById(R.id.exo_player_surface_view)
         val trackSelector = DefaultTrackSelector(registrar.activity())
         this.exoPlayer = SimpleExoPlayer.Builder(registrar.activity())
@@ -297,8 +298,7 @@ class ExoPlayerController(private val id: Int,
 
 
             this.exoPlayer.prepare(adsMediaSource)
-            this.exoPlayer.playWhenReady = false
-
+             exoPlayer.playWhenReady = true
             this.dataSource = dataSource
         }
     }

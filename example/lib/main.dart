@@ -13,25 +13,39 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.picture_in_picture),
+          onPressed: () async {
+            if (_controller != null) {
+              await _controller.enterPip();
+            }
+          },
+        ),
         title: const Text('Plugin example app'),
       ),
       body: _buildVideoPlayerWidget(),
     );
   }
 
+  VideoViewController _controller;
+
   Widget _buildVideoPlayerWidget() {
     return Container(
       alignment: Alignment.center,
       child: NativeVideoView(
         keepAspectRatio: true,
-        showMediaController: true,
-	      enableVolumeControl: true,
-        onCreated: (controller) {
-          controller.setVideoSource(
-            'assets/example.mp4',
-            sourceType: VideoSourceType.asset,
+        showMediaController: false,
+        enableVolumeControl: true,
+        useExoPlayer: true,
+        onCreated: (controller) async {
+          _controller = controller;
+
+          await controller.setVideoSource(
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            sourceType: VideoSourceType.network,
             requestAudioFocus: true,
           );
+          controller.play();
         },
         onPrepared: (controller, info) {
           controller.play();

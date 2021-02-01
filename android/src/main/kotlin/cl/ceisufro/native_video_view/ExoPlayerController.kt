@@ -1,7 +1,9 @@
 package cl.ceisufro.native_video_view
 
+
 import android.app.Activity
 import android.app.Application
+import android.app.PictureInPictureParams
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -20,9 +22,12 @@ import com.google.android.exoplayer2.ExoPlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader
+import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.ads.AdsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
@@ -54,6 +59,10 @@ class ExoPlayerController(private val id: Int,
     private var disposed: Boolean = false
     private var playerState: PlayerState = PlayerState.NOT_INITIALIZED
 
+    private var playerView: PlayerView
+    private var adsLoader: ImaAdsLoader? = null
+
+
     init {
         this.methodChannel.setMethodCallHandler(this)
         this.registrarActivityHashCode = registrar.activity().hashCode()
@@ -64,6 +73,23 @@ class ExoPlayerController(private val id: Int,
         this.exoPlayer = SimpleExoPlayer.Builder(registrar.activity())
                 .setTrackSelector(trackSelector)
                 .build()
+
+
+
+         playerView =  constraintLayout.findViewById(R.id.player_view)
+        playerView.controllerAutoShow = false;
+
+        adsLoader = ImaAdsLoader(getView().context, Uri.parse("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="))
+
+
+
+        playerView?.player = exoPlayer;
+        adsLoader?.setPlayer(exoPlayer);
+
+
+
+        Log.d("DEBUG", adsLoader?.toString())
+
         when (activityState.get()) {
             STOPPED -> {
                 stopPlayback()
@@ -93,6 +119,11 @@ class ExoPlayerController(private val id: Int,
         return constraintLayout
     }
 
+
+    fun getActivity():Activity {
+        return  registrar.activity()
+
+    }
     override fun dispose() {
         if (disposed) return
         disposed = true
@@ -101,6 +132,22 @@ class ExoPlayerController(private val id: Int,
         registrar.activity().application.unregisterActivityLifecycleCallbacks(this)
         Log.d("VIDEO. NVV", "Disposed view $id")
     }
+
+    fun enterPictureInPicture(){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            getActivity().enterPictureInPictureMode(PictureInPictureParams.Builder().build())
+
+        }
+     }
+
+    fun exitPictureInPicture(){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+            getActivity().moveTaskToBack(false)
+        }
+    }
+
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
@@ -120,6 +167,14 @@ class ExoPlayerController(private val id: Int,
             }
             "player#start" -> {
                 startPlayback()
+                result.success(null)
+            }
+            "player#enterPIP" -> {
+                enterPictureInPicture()
+                result.success(null)
+            }
+            "player#exitPIP" -> {
+                exitPictureInPicture()
                 result.success(null)
             }
             "player#pause" -> {
@@ -226,13 +281,24 @@ class ExoPlayerController(private val id: Int,
     private fun initVideo(dataSource: String?) {
         this.configurePlayer()
         if (dataSource != null) {
+
+
+
             val uri = Uri.parse(dataSource)
             val dataSourceFactory = getDataSourceFactory(uri)
-            val mediaSource = ProgressiveMediaSource
-                    .Factory(dataSourceFactory, DefaultExtractorsFactory())
-                    .createMediaSource(uri)
+
+            val mediaSourceFactory = ProgressiveMediaSource.Factory(dataSourceFactory)
+
+            // Create the MediaSource for the content you wish to play.
+
+            // Create the MediaSource for the content you wish to play.
+            val mediaSource: MediaSource = mediaSourceFactory.createMediaSource(uri)
+            val adsMediaSource = AdsMediaSource(mediaSource, dataSourceFactory, adsLoader, playerView)
+
+
+            this.exoPlayer.prepare(adsMediaSource)
             this.exoPlayer.playWhenReady = false
-            this.exoPlayer.prepare(mediaSource)
+
             this.dataSource = dataSource
         }
     }

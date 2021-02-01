@@ -245,6 +245,27 @@ class VideoViewController {
     return false;
   }
 
+
+  Future<bool> enterPip( ) async {
+    try {
+       await channel.invokeMethod("player#enterPIP");
+      return true;
+    } catch (ex) {
+      print(ex);
+    }
+    return false;
+  }
+  Future<bool> exitPip( ) async {
+    try {
+      await channel.invokeMethod("player#exitPIP");
+      return true;
+    } catch (ex) {
+      print(ex);
+    }
+    return false;
+  }
+
+
   /// Starts the timer that monitor the time progression of the playback.
   void _startProgressTimer() {
     if (_progressionController == null) {

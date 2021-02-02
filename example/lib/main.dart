@@ -25,10 +25,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       });
     }
     if (state == AppLifecycleState.inactive) {
-         inPip = true;
-         _controller.enterPip().then((value) => _controller.play());
-     }
+      inPip = true;
+      _controller.enterPip().then((value) => _controller.play());
+    }
   }
+
   VideoViewController _controller;
   @override
   Widget build(BuildContext context) {
@@ -64,13 +65,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               onCompletion: (controller) {
                 print('Video completed');
               },
-            ),
+              imaUrl:""
+              ),
           ),
         ),
       ),
     );
   }
-
-
-
 }

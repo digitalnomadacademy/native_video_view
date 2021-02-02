@@ -74,6 +74,9 @@ class NativeVideoView extends StatefulWidget {
   /// when the player is ready to start the playback of a video.
   final PreparedCallback onPrepared;
 
+  /// Url for IMA playback, any
+  final String imaUrl;
+
   /// Constructor of the widget.
   const NativeVideoView({
     Key key,
@@ -86,6 +89,7 @@ class NativeVideoView extends StatefulWidget {
     @required this.onCreated,
     @required this.onPrepared,
     @required this.onCompletion,
+    @required this.imaUrl,
     this.onError,
     this.onProgress,
   })  : assert(onCreated != null && onPrepared != null && onCompletion != null),
@@ -128,6 +132,7 @@ class _NativeVideoViewState extends State<NativeVideoView> {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> creationParams = <String, dynamic>{
+      'imaUrl': widget.imaUrl,
       'useExoPlayer': widget.useExoPlayer ?? false,
     };
     if (defaultTargetPlatform == TargetPlatform.android) {

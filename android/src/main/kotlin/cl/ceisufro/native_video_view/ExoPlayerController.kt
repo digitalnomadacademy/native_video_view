@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ExoPlayerController(private val id: Int,
                           activityState: AtomicInteger,
-                          private val registrar: PluginRegistry.Registrar)
+                          private val registrar: PluginRegistry.Registrar,params:Map<String, Any?> )
     : Application.ActivityLifecycleCallbacks,
         MethodChannel.MethodCallHandler,
         PlatformView,
@@ -75,12 +75,13 @@ class ExoPlayerController(private val id: Int,
                 .setTrackSelector(trackSelector)
                 .build()
 
+          val adsUrl:String = params["imaUrl"] as String;
 
 
          playerView =  constraintLayout.findViewById(R.id.player_view)
         playerView.controllerAutoShow = false;
 
-        adsLoader = ImaAdsLoader(getView().context, Uri.parse("https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="))
+        adsLoader = ImaAdsLoader(getView().context, Uri.parse(adsUrl))
 
 
 

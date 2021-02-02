@@ -14,11 +14,12 @@ class NativeVideoViewFactory(private val activityState: AtomicInteger,
 
     override fun create(context: Context?, id: Int, args: Any?): PlatformView {
         val params = args as Map<String, Any?>
+
         val builder = NativeVideoViewBuilder()
         if (params.containsKey("useExoPlayer")) {
             val useExoPlayer = params["useExoPlayer"] as Boolean
             builder.setUseExoPlayer(useExoPlayer)
         }
-        return builder.build(id, activityState, registrar)
+        return builder.build(id, activityState, registrar,params)
     }
 }

@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger
 class NativeVideoViewBuilder : NativeVideoViewOptionsSink {
     private var useExoPlayer: Boolean = false
 
-    fun build(id: Int, state: AtomicInteger, registrar: PluginRegistry.Registrar): PlatformView {
+    fun build(id: Int, state: AtomicInteger, registrar: PluginRegistry.Registrar,params:Map<String, Any?>): PlatformView {
         return if (useExoPlayer) {
-            ExoPlayerController(id, state, registrar)
+            ExoPlayerController(id, state, registrar,params)
         } else {
             NativeVideoViewController(id, state, registrar)
         }
